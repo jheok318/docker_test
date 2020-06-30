@@ -2,7 +2,7 @@
 
 #### docker의 설치
 
-```
+```bash
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -19,7 +19,7 @@ apt-cache policy docker-ce
 
 > docker를 사용하다보면 docker 데몬이 root권한으로 실행되기 때문에 sudo를 붙여줘야하는 불편함이 있다. 이를 해결 하기 위해 로그인 계정을 docker 그룹에 추가해준다.
 
-```
+```bash
 sudo usermod -aG docker $USER
 ```
 
@@ -37,41 +37,41 @@ sudo usermod -aG docker $USER
 >
 >도커 이미지를 이용하면 이미지에 설정해둔 대로 컨테이너의 구성환경을 적용할 수 있다.
 
-- 버전확인
+- 버전확인(-v)
 
-```
+```bash
 docker -v
 Docker version 19.03.12, build 48a66213fe
 ```
 
-- 이미지 목록 보기
+- 이미지 목록 보기(images)
 
-```
+```bash
 sudo docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 ubuntu              latest              74435f89ab78        11 days ago         73.9MB
 ubuntu              18.04               8e4ce0a6ce69        11 days ago         64.2MB
 ```
 
-- 이미지 검색
+- 이미지 검색(search)
 
-```
+```bash
 sudo docker search [이미지 이름]
 ex) sudo docker search ubuntu
 ```
 
-- 이미지 받기
+- 이미지 받기(pull)
 
-```
+```bash
 sudo docker pull [이미지 이름]:[버전]
 ex) sudo docker pull ubuntu:16.04
 ```
 
 > 버전에 latest를 쓰면 최신 버전으로 받을수 있다.
 
-- 이미지 삭제
+- 이미지 삭제(rmi)
 
-```
+```bash
 sudo docker rmi [이미지 id]
 sudo docker rmi -f [이미지 id]
 ```
@@ -86,17 +86,17 @@ sudo docker rmi -f [이미지 id]
 >
 > 컨테이너는 이미지를 읽기전용으로 실행 한다.
 
-- 컨테이너 목록 보기
+- 컨테이너 목록 보기(ps)
 
-```
+```bash
 sudo docker ps [옵션]
 ```
 
 > -a : 모든 컨테이너 목록 출력
 
-- 컨테이너 만들고 실행
+- 컨테이너 만들고 실행(run)
 
-```
+```bash
 sudo docker run [옵션] [이미지 이름] : [태그]
 ex) docker run --rm -it --name server ubutu:latest /bin/sh
 => ubuntu 최신버전, server name을 가진 컨테이너의 /bin/sh를 실행 시킨후 프로세스 종료시 컨테이너를 제거해라
@@ -117,23 +117,22 @@ ex) docker run --rm -it --name server ubutu:latest /bin/sh
 > --rm : 프로세스 종료시 컨테이너 자동 제거
 >
 > --link : 컨테이너 연결 [컨테이너명 : tag]
->
 - 컨테이너 나가기
 
 > ctrl + p,q를 누르면 현재 실행중인 docker의 shell을 나간다
 >
 > exit를 입력하면 실행중이 docker를 종료 시키고 나간다.
 
-- 컨테이너 시작
+- 컨테이너 시작(start)
 
-```
+```bash
 sudo docker start [컨테이너 id 또는 name]
 ex) docker start 74435f89ab78 or docker start ubuntu:18.04
 ```
 
-- 만들어진 컨테이너 들어가기
+- 만들어진 컨테이너 들어가기(attach)
 
-```
+```bash
 docker attach ubuntu:latest
 ```
 
@@ -143,31 +142,77 @@ docker attach ubuntu:latest
 >
 > start, stop : 기존에 실행 되었던 컨테이너를 중지시키거나 실행시킨다.
 
-- 컨테이너 재시작
+- 컨테이너 재시작(restart)
 
-```
+```bash
 sudo docker retart [컨테이너 id 또는 name]
 ex) docker restart 74435f89ab78 or docker restart ubuntu:18.04
 ```
 
-- 컨테이너 정지
+- 컨테이너 정지(stop)
 
-```
+```bash
 sudo docker stop [컨테이너 id 또는 name]
 ex) docker restart 74435f89ab78 or docker restart ubuntu:18.04
 ```
 
-- 컨테이너 이름 변경
+- 컨테이너 이름 변경(raname)
 
-```
+```bash
 sudo docker rename [기존 이름] [새로운 이름]
 ```
+
+- 외부에서 컨테이너 안의 명령을 실행(exec)
+
+```bash
+sudo docker exec [옵션] [컨테이너 이름, ID] [명령] [매개변수]
+ex) $sudo docker run -d --name etest ubuntu:16.04 /bin/bash -c "while true; do echo Hello World; sleep 1; done"
+```
+
+> <u>옵션</u>
+>
+> -d : 명령을 백그라운드로 실행한다.
+>
+> -i : 표준입력모드 활성화
+>
+> -t : tty모드, bash 사용시 필요함, 없어도 명령 실행 가능하나 쉘표시 X
+
+```bash
+$docker ps 
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+8baf9b0b0b98        ubuntu:16.04        "/bin/bash -c 'while…"   2 minutes ago       Up 2 minutes                            etest
+```
+
+> -d 옵션을 통해 백그라운드에서 while문을 계속 해서 실행한다.
+
+```bash
+ubuntu11@ubuntu11:~$ docker exec -it etest /bin/bash
+root@8baf9b0b0b98:/# ps ax
+    PID TTY      STAT   TIME COMMAND
+      1 ?        Ss     0:00 /bin/bash -c while true; do echo Hello World; sleep 1; done
+    259 pts/0    Ss     0:00 /bin/bash
+    270 ?        S      0:00 sleep 1
+    271 pts/0    R+     0:00 ps ax
+root@8baf9b0b0b98:/# exit
+```
+
+> exec를 통해 etest컨테이너로 들어가서 쉘을 실행시킨다.
+>
+> ps ax를 실행시켜보면 hello world를 출력하는 /bin/bash와는 별개로 docker exec 명령으로 실행한 /bin/bash를 확인 할수 있다.
+>
+> 이때 exit를 입력하여 쉘을 빠져나가도 컨테이너는 정지되지 않고 <u>계속 실행된다</u>.
+
+```bash
+$ docker exec hello apt-get update
+```
+
+> 이 처럼 bash쉘을 연결하지 않고 apt-get update과 같은 명령어를 실행시킬수 있다.
 
 - 컨테이너 이미지화
 
 > 컨테이너를 이미지화 하기 전에 컨테이너를 멈춰준다
 
-```
+```bash
 $ docker ps -a
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                        PORTS               NAMES
 2167b8a5218f        ubuntu:16.04        "/bin/bash"         8 minutes ago       Exited (0) 11 seconds ago                         webser
@@ -175,7 +220,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ```
 2167b8a5218f이 방금 종료 된 컨테이너이다
 
-```
+```bash
 $ sudo docker commit -a "jheok" 2167b8a5218f test_con/[주석 넣기가능]
 sha256:762362327c7508180ede8aa666e5606bb4db0b5d60d8d10f5ea2b5754d68f9ab
 
@@ -192,7 +237,7 @@ ubuntu              latest              74435f89ab78        12 days ago         
 
 ## 컨테이너 외부 노출(nginx이용하여 웹서버 실행)
 
-```
+```bash
 $ docker run -d -p 8000:80 nginx:latest
 $  curl localhost:8000
 <!DOCTYPE html>
@@ -209,7 +254,7 @@ $  curl localhost:8000
 
 ## Dokcerfile로 이미지 생성하기(예시)
 
-```
+```dockerfile
 #vi dockerfiles
 FROM ubuntu:16.04
 MAINTAINER jheok<jheok@test.com>
@@ -219,11 +264,11 @@ RUN apt-get install -y nginx
 RUN echo "\dameon off;" >> /etc/nginx/nginx.conf
 RUN chown -R www-data:www-data /var/lib/nginx
 
-VOLUME["/data","/etc/nginx/site-enabled", "/var/log/nginx"]
+VOLUME ["/data","/etc/nginx/site-enabled", "/var/log/nginx"]
 
 WORKDIR /etc/nginx
 
-CMD["nginx"]
+CMD ["nginx"]
 
 EXPOSE 80
 EXPOSE 443
@@ -231,23 +276,124 @@ EXPOSE 443
 
 > FROM : base image를 지정할때 사용한다. ubuntu:16.04 처럼 os와 버전까지 정확히 지정해주는것이 좋다.
 >
+> ```dockerfile
+> FROM <이미지>
+> FROM <이미지>:<태그>
+> ```
+>
+> 
+>
 > MAINTAINER : 이미지를 생성한 사람의 정보를 설정한다. 형식은 자유이나 위와같은 형식으로 작성해준다. 생략이 가능하다
 >
+> ```dockerfile
+> MAINTAINER 사용자ID<사용자 e-mail>
+> ```
+>
+> 
+>
 > RUN : package를 설치하는 것 등등의 shell commnad를 해당 docker image에 실행 시킬때 사용한다.
+>
+> ```dockerfile
+> RUN ["<커맨드>","<파라미터1>","<파라미터2>"]
+> RUN <전체 커맨드>
+> ex) RUN pip3 install -r requirements.txt
+> ```
+>
+> 
 >
 > VOLUME : instruction을 사용하여 호스트의 dir를 docker컨테이너에 연결 시킬수 있다. 그래서 데이터, 소스코드, 외부설정파일 등등을 docker image에 commit하지 않고 docker containr에서 사용 가능 하도록 한다. 
 >
 > WORKDIR : working dir를 지정해준다. ubuntu의 cd와 같은 개념으로 생각한다.
 >
+> ```dockerfile
+> WORKDIR <이동할 경로>
+> ex) WORKDIR /usr/app
+> ```
+>
+> 
+>
+> ENTRYPOINT : 이미지를 컨테이너로 띄울 때 항상 실행되야 하는 커맨드를 지정할때 사용한다
+>
+> - Django 서버 실행
+>
+> ```dockerfile
+> ENTRYPOINT ["<커맨드>","<파라미터1>","<파라미터2>"]
+> ENTRYPOINT <전체 커맨드>
+> 
+> ex) ENTRYPOINT ["python3","manage.py","runserver"]
+> ```
+>
+> 
+>
 > CMD : 이 커맨드를 사용하여 docker container가 시작할때 실행할 커맨드를 지정할수 있다. RUN과 기능은 비슷하다 하지만 CMD는 docker image를 빌드할때 실행되는 것이 아닌 docker conatiner가 시작될때 실행 된다.
+>
+> ```bash
+> CMD ["<커맨드>","<파라미터1>","<파라미터2>"]
+> CMD ["<파라미터1>","<파라미터2>"]
+> CMD <전체 커맨드>
+> 
+> ex) CMD ["echo", "Hi"]
+> $ docker run test
+> Hi
+> $ docker run test echo Bye
+> Bye
+> 파라미터 없이 이미지를 실행하면 hi가 출력 되지만 파라미터를 넘겨주면 해당 파라미터가 출력된다.
+> ```
+>
+> 
 >
 > EXPOSE : docker container 외부에 노출할 포트를 지정할때 사용한다. 80 port, 443port를 노출하고 싶다면 위와 같이 명시한다. EXPOSE instruction을 지정 해주었다고 해서 곧바로 그 포트를 외부에서 접속 할수 는 없다 . docker는 포트를 자동으로 open하지 않는다. Docker container를 실행할때 EXPOSE를 통해 지정된 포트를 열어 주어야 한다. expose에는 주석을 넣으면 안된다.
 >
+> ```dockerfile
+> EXPOSE <포트>
+> EXPOSE <포트>/<프로토콜>
+> 
+> ex) EXPOSE 80
+> 	EXPOSE 9999/UDP
+> ```
+>
+> 
+>
+> COPY : COPY명령문은 호스의 dir나 file을 docker 이미지의 파일 시스템으로 복사하기 위해 사용한다. 절대, 상대 경로 모두 지원한다.
+>
+> ```dockerfile
+> COPY <시작>... <목적>
+> COPY ["<시작>",... "<목적>"]
+> 
+> ex) COPY package.json package.json
+> ```
+>
+> 
+>
+> ADD : COPY명령문과 비슷하나 일반 파일 뿐만 아니라 압축 파일이나 네트워크 상의 파일도 사용할 수 있다. 
+>
+> ```dockerfile
+> ADD <시작>... <목적>
+> ADD ["<시작>",... "<목적>"]
+> 
+> ex) ADD package.json package.json
+> ```
+>
+> 
+>
 > ENV : 환경변수를 지정할때 사용한다. ENV로 지정한 환경변수는 $변수명, ${변수명}으로 작성한다.
+>
+> ```dockerfile
+> ENV <키> <값>
+> ENV <키>=<값>
+> 
+> ex) ENV GOPATH /go
+> 	ENV PATH /go/bin:$PATH
+> ```
+>
+> 
 >
 > USER : 해당 docker image를 실행할 user를 지정해준다.
 >
-> LABEL : 라벨을 생성해준다.
+> ```dockerfile
+> USER test1
+> USER root
+> ```
 
 <hr/>
 
@@ -255,7 +401,7 @@ EXPOSE 443
 
 - **docker file 작성**
 
-```
+```bash
 #vim
 FROM centos:7
 MAINTAINER thisisme
@@ -272,7 +418,7 @@ RUN chmod 755 out.sh
 
 - **image 생성**
 
-```
+```bash
 ubuntu11@ubuntu11:~/docker11$ docker build -t ttest /home/ubuntu11/docker11/
 Sending build context to Docker daemon  3.584kB
 Step 1/8 : FROM centos:7
@@ -320,14 +466,14 @@ centos              7                   b5b4d78bc90c        7 weeks ago         
 
 - 실행
 
-```
+```bash
 docker run -it ttest /bin/cat go.log
 this is log file!!
 ```
 
 - 생성된 image에 접속해서 확인하기
 
-```
+```bash
 $ docker run -it ttest /bin/bash
 [root@9c1d783e41d4 helloworld]# pwd
 /helloworld
@@ -354,7 +500,7 @@ this is log file!!
 
 - 생성(create) 및 조회(ls), 상세 조회(inspect)
 
-```
+```bash
 $ docker volume create our-vol
 our-vol
 $ docker volume ls
@@ -388,20 +534,20 @@ $ docker volume inspect our-vol
 >
 > busybox : 이미지의 이름
 
-```
+```bash
 $ docker run -v our-vol:/app --name one busybox touch /app/test.txt
 ```
 
 > touch /app/test.txt 커맨드를 실행하였기 때문에, test.txt 파일이 our-vol 볼륨의 경로에서 남아있다.
 
-```
+```bash
 # ls /var/lib/docker/volumes/our-vol/_data/
 test.txt
 ```
 
 > docker inspect로 컨테이너의 상세 정보를 확인해 보면 our-vol 볼륨이 volume타입으로 마운트 되어 있다.
 
-```
+```bash
 $ docker insperct one
 ...
 "Mounts": [
@@ -421,7 +567,7 @@ $ docker insperct one
 
 - 볼륨 삭제
 
-```
+```bash
 $ docker volume rm our-vol
 Error response from daemon: remove our-vol: volume is in use - [5f05b72f81fc20be5a68a7a39...
 ```
@@ -430,7 +576,7 @@ Error response from daemon: remove our-vol: volume is in use - [5f05b72f81fc20be
 >
 > 이럴때는 볼륨이 마운트 되어 있는 컨테이너를 삭제하고 볼륨을 삭제해야 한다.
 
-```
+```bash
 $ docker rm -f one two
 one
 two
@@ -442,7 +588,7 @@ our-vol
 
 > 마운트되어 있지 않은 모든 볼륨을 한번에 제거할 수 있습니다.
 
-```
+```bash
 $docker volume prune
 ```
 
@@ -454,7 +600,7 @@ $docker volume prune
 >
 > 예를 들어 현재 경로에 test.txt를 생성하고, 해당 호스트 경로를 컨테이너의 /app 경로에 마운트 하는방법을 예시로 들어보자.
 
-```
+```bash
 $touch test.txt
 $ docker run -v `pwd`:/app -it --name one busybox /bin/sh
 / # ls /app
