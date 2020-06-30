@@ -1,22 +1,24 @@
 # Docker
 
-- docker의 설치
+<img src="img/docker.png" alt="docker" style="zoom: 33%;" />
 
-- sudo 없이 실행
+## 목차
 
+- Docker의 설치
+- Docker를 sudo 없이 실행
 - 명령어(이미지, 컨테이너)
-
 - 컨테이너의 이미지화
-
 - 컨테이너 외부노출
-
 - dockerfile 생성 및 실습
-
 - 컨테이너에 데이터 저장(볼륨, 바인트 마운트)
+- Docker compose
 
-  
 
-#### docker의 설치 (os : ubuntu)
+## Docker 의 설치
+
+### docker의 환경 맞추기 (os : ubuntu)
+
+> 각각 한줄씩 terminal에 입력을 해준다.
 
 ```bash
 $ sudo apt update
@@ -24,28 +26,74 @@ $ sudo apt install apt-transport-https ca-certificates curl software-properties-
 $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 $ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
 $ sudo apt update
-apt-cache policy docker-ce
 ```
 
-> 각각 한줄씩 terminal에 입력을 해준다.
+### 확인하기
+
+
+```bash
+$ apt-cache policy docker-ce
+$ sudo apt install docker-ce
+docker-ce: 
+	Installed: (none) 
+	Candidate: 19.03.12~3-0~ubuntu-focal
+```
+
+> install 부분이 아직 none이므로 도커는 설치 되지않은것을 알 수 있다.
+
+### 설치하고 확인
+
+```bash
+$sudo apt install docker-ce
+
+$ sudo systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2020-06-30 09:20:42 KST; 2h 38min ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 788 (dockerd)
+      Tasks: 10
+     Memory: 137.5M
+     CGroup: /system.slice/docker.service
+             └─788 /usr/bin/dockerd -H fd:// --
+...(생략)
+
+$ sudo apt-cache policy docker-ce
+docker-ce:
+  Installed: 5:19.03.12~3-0~ubuntu-focal
+  Candidate: 5:19.03.12~3-0~ubuntu-focal
+  Version table:
+ *** 5:19.03.12~3-0~ubuntu-focal 500
+        500 https://download.docker.com/linux/ubuntu focal/stable amd64 Packages
+        100 /var/lib/dpkg/status
+...(생략)
+```
+
+> systemctl에서 docker의 status를 확인해보면 active(running)를 확인할 수 있다.
+>
+> 또한 위에서 환경을 확인해 보았을때는 Installed: (none) 이 Installed: 5:19.03.12~3-0~ubuntu-focal로 변경 되었음을 확인할 수 있다.
 
 <hr/>
 
-## docker sudo 없이 실행
+## Docker를 sudo 없이 실행
 
 > docker를 사용하다보면 docker 데몬이 root권한으로 실행되기 때문에 sudo를 붙여줘야하는 불편함이 있다. 이를 해결 하기 위해 로그인 계정을 docker 그룹에 추가해준다.
 
 ```bash
 $ sudo usermod -aG docker $USER
+$ sudo service docker restart
 ```
 
 > 위 명령어를 실행시 프로그램을 종료후 다시 로그인 해도 sudo 없이 docker 명령어의 실행이 가능하다.
 
 <hr/>
 
-## Docker 명령어
+## 명령어(이미지, 컨테이너)
 
-###### **이미지 관련**
+도커에는 크게 이미지와 컨테이너가 존재 한다. 
+
+### 이미지
 
 >image란 필요한 프로그램, 라이브러리, 소스 등을 설치한 뒤에 이를 파일로 만든 것이다.
 >
@@ -75,17 +123,17 @@ Server: Docker Engine - Community
 ...
 ```
 
-Server가 안나올때 : docker 가 root계정으로 설치 되었을때 root계정이 아닌 계정으로 docker를 실해하고자 할때 server가 안나옴
+Server가 안나올때 : docker 가 root계정으로 설치 되었을때 root계정이 아닌 계정으로 docker를 실해하고자 할때 server가 안나옴 (위에서 Docker를 sudo 없이 실행을 했다면 뜨지않음)
 
 ```bash
-$ sudo usermod -a -G docker $USER
+$ sudo usermod -aG docker $USER
 $ sudo service docker restart
 ```
 
 - 이미지 목록 보기(images)
 
 ```bash
-$ sudo docker images | $ docker image ls
+$ docker images | $ docker image ls
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 ubuntu              latest              74435f89ab78        11 days ago         73.9MB
 ubuntu              18.04               8e4ce0a6ce69        11 days ago         64.2MB
@@ -94,29 +142,31 @@ ubuntu              18.04               8e4ce0a6ce69        11 days ago         
 - 이미지 검색(search)
 
 ```bash
-$ sudo docker search [이미지 이름]
-ex) $ sudo docker search ubuntu
+$ docker search [이미지 이름]
+ex) $ docker search ubuntu
 ```
 
 - 이미지 받기(pull)
 
 ```bash
-$ sudo docker pull [이미지 이름]:[버전]
-ex) $ sudo docker pull ubuntu:16.04
+$ docker pull [이미지 이름]:[버전]
+ex) $ docker pull ubuntu:16.04
 ```
 
 > 버전에 latest를 쓰면 최신 버전으로 받을수 있다.
+>
+> 혹은 그냥 이미지 이름을 써도 : latest가 붙어서 최신 버전을 받는다.
 
 - 이미지 삭제(rmi)
 
 ```bash
-$ sudo docker rmi [이미지 id]
-$ sudo docker rmi -f [이미지 id]
+$ docker rmi [이미지 id]
+$ docker rmi -f [이미지 id]
 ```
 
-> 컨테이너를 삭제하기 전에 이미지를 삭제할때 **-f** 옵션을 붙이면 컨테이너도 강제 삭제가 가능하다.
+> 컨테이너를 삭제하지 않고 이미지를 삭제할때 **-f** 옵션을 붙이면 컨테이너도 같이 삭제가 된다.
 
-###### **컨테이너 관련**
+### 컨테이너
 
 > Container란 생성된 이미지가 실행된 상태이다. 
 >
@@ -127,7 +177,7 @@ $ sudo docker rmi -f [이미지 id]
 - 컨테이너 목록 보기(ps)
 
 ```bash
-$ sudo docker ps [옵션]
+$ docker ps [옵션]
 ```
 
 > -a : 모든 컨테이너 목록 출력
@@ -135,9 +185,9 @@ $ sudo docker ps [옵션]
 - 컨테이너 만들고 실행(run)
 
 ```bash
-$ sudo docker run [옵션] [이미지 이름] : [태그]
+$ docker run [옵션] [이미지 이름] : [태그]
 ex) $ docker run --rm -it --name server ubutu:latest /bin/sh
-=> ubuntu 최신버전, server name을 가진 컨테이너의 /bin/sh를 실행 시킨후 프로세스 종료시 컨테이너를 제거해라
+=> ubuntu 최신버전, server name을 가진 컨테이너의 /bin/sh를 -it 옵션을 준 후에 실행 시킨후 프로세스 종료시 컨테이너를 제거한다.
 ```
 
 > -d : 백그라운드 모드 
@@ -148,7 +198,11 @@ ex) $ docker run --rm -it --name server ubutu:latest /bin/sh
 >
 > -e : 컨테이너 내에서 사용할 환경변수 설정
 >
-> --name : 컨테이너 이름 설정
+> --name : 컨테이너 이름 설정, 이름을 설정하지 않을시 랜덤으로 생성된다.
+>
+> -i : 상호입출력
+>
+> -t : tty를 활성화하여 bash 쉘을 사용
 >
 > -it : -i 와 -t를 동시에 사용한 것으로 터미널 입력을 위한 옵션(컨테이너의 표준 입력과 로컬 컴퓨터의 키보드 입력을 연결)
 >
@@ -157,54 +211,58 @@ ex) $ docker run --rm -it --name server ubutu:latest /bin/sh
 > --link : 컨테이너 연결 [컨테이너명 : tag]
 - 컨테이너 나가기
 
-> ctrl + p,q를 누르면 현재 실행중인 docker의 shell을 나간다
+> ctrl + p,q를 누르면 현재 실행중인 docker의 shell을 나간다, 실행중인 container는 백그라운드 모드로 변경된다.
 >
 > exit를 입력하면 실행중이 docker를 종료 시키고 나간다.
 
 - 컨테이너 시작(start)
 
+> stop으로 중지된 container를 실행시킨다.
+
 ```bash
-$ sudo docker start [컨테이너 id 또는 name]
+$ docker start [컨테이너 id 또는 name]
 ex) $ docker start 74435f89ab78 or docker start ubuntu:18.04
-```
-
-- 만들어진 컨테이너 들어가기(attach)
-
-```bash
-$ docker attach ubuntu:latest
 ```
 
 - run과 start, stop의 차이
 
 > run : 새로운 컨테이너를 이미지로부터 만든다.
 >
-> start, stop : 기존에 실행 되었던 컨테이너를 중지시키거나 실행시킨다.
+> start, stop : 기존에 실행 되었던 컨테이너를 실행시키거나 중지시킨다.
+
+- 만들어진 컨테이너 들어가기(attach)
+
+> 백그라운드로 실행중인 container에 들어 갈때 사용된다.
+
+```bash
+$ docker attach ubuntu:latest
+```
 
 - 컨테이너 재시작(restart)
 
 ```bash
-$ sudo docker retart [컨테이너 id 또는 name]
+$ docker retart [컨테이너 id 또는 name]
 ex) $ docker restart 74435f89ab78 or docker restart ubuntu:18.04
 ```
 
 - 컨테이너 정지(stop)
 
 ```bash
-$ sudo docker stop [컨테이너 id 또는 name]
+$ docker stop [컨테이너 id 또는 name]
 ex) $ docker restart 74435f89ab78 or docker restart ubuntu:18.04
 ```
 
 - 컨테이너 이름 변경(raname)
 
 ```bash
-$ sudo docker rename [기존 이름] [새로운 이름]
+$ docker rename [기존 이름] [새로운 이름]
 ```
 
 - 외부에서 컨테이너 안의 명령을 실행(exec)
 
 ```bash
-$ sudo docker exec [옵션] [컨테이너 이름, ID] [명령] [매개변수]
-ex) $sudo docker run -d --name etest ubuntu:16.04 /bin/bash -c "while true; do echo Hello World; sleep 1; done"
+$ docker exec [옵션] [컨테이너 이름, ID] [명령] [매개변수]
+ex) $ docker exec -it etest /bin/bash
 ```
 
 > <u>옵션</u>
@@ -215,12 +273,17 @@ ex) $sudo docker run -d --name etest ubuntu:16.04 /bin/bash -c "while true; do e
 >
 > -t : tty모드, bash 사용시 필요함, 없어도 명령 실행 가능하나 쉘표시 X
 
+- exec의 예제
+
 ```bash
+$sudo docker run -d --name etest ubuntu:16.04 /bin/bash -c "while true; do echo Hello World; sleep 1; done"
 $docker ps 
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
 8baf9b0b0b98        ubuntu:16.04        "/bin/bash -c 'while…"   2 minutes ago       Up 2 minutes                            etest
 ```
 
+> name이 etest인 컨테이너를 하나 생성한다.
+>
 > -d 옵션을 통해 백그라운드에서 while문을 계속 해서 실행한다.
 
 ```bash
@@ -246,7 +309,7 @@ $ docker exec hello apt-get update
 
 > 이 처럼 bash쉘을 연결하지 않고 apt-get update과 같은 명령어를 실행시킬수 있다.
 
-- 컨테이너 이미지화
+- 컨테이너 이미지화 (commit)
 
 > 컨테이너를 이미지화 하기 전에 컨테이너를 멈춰준다
 
@@ -256,10 +319,12 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 2167b8a5218f        ubuntu:16.04        "/bin/bash"         8 minutes ago       Exited (0) 11 seconds ago                         webser
 504dcee082d1        ubuntu:16.04        "/bin/bash"         9 minutes ago       Created                                        
 ```
-2167b8a5218f이 방금 종료 된 컨테이너이다
+> 2167b8a5218f이 방금 종료 된 컨테이너이다
 
 ```bash
-$ sudo docker commit -a "jheok" 2167b8a5218f test_con/[주석 넣기가능]
+$ docker commit <옵션> <컨테이너 이름, ID> <저장소 이름>/<이미지 이름>:<태그>
+
+$ docker commit -a "jheok" 2167b8a5218f test_con/[주석 넣기가능]
 sha256:762362327c7508180ede8aa666e5606bb4db0b5d60d8d10f5ea2b5754d68f9ab
 
 $docker images
@@ -269,13 +334,21 @@ ubuntu              16.04               330ae480cb85        12 days ago         
 ubuntu              latest              74435f89ab78        12 days ago         73.9MB
 ```
 
+> 옵션
+>
+> -a : 생성한 사람의 정보를 설정할수 있다.
+>
+> -m : 변경 사항에 대한 로그 메시지를 설정한다.
+>
+> -p : 이미지를 생성하는 동안 컨테이너를 일시 정지 한다.
+>
 > test_con이미지가 생성 됨을 확인할 수 있다.
 
 <hr/>
 
 ## 도커 컨테이너 라이프 사이클
 
-<img src="img/02-1.png" alt="image-20200629161534829" style="zoom:67%;" />
+<img src="img/02-1.png" alt="02-1" style="zoom:67%;" />
 
 
 
@@ -303,7 +376,7 @@ $  curl localhost:8000
 ```dockerfile
 #vi dockerfiles
 FROM ubuntu:16.04
-MAINTAINER jheok<jheok@test.com>
+MAINTAINER thismain<thismain@test.com>
 
 RUN apt-get update
 RUN apt-get install -y nginx
@@ -329,7 +402,7 @@ EXPOSE 443
 >
 > 
 >
-> MAINTAINER : 이미지를 생성한 사람의 정보를 설정한다. 형식은 자유이나 위와같은 형식으로 작성해준다. 생략이 가능하다
+> MAINTAINER : 이미지를 생성한 사람의 정보를 설정한다. 형식은 자유이나 위와같은 형식으로 작성해준다. 생략이 가능하다.
 >
 > ```dockerfile
 > MAINTAINER 사용자ID<사용자 e-mail>
@@ -342,12 +415,19 @@ EXPOSE 443
 > ```dockerfile
 > RUN ["<커맨드>","<파라미터1>","<파라미터2>"]
 > RUN <전체 커맨드>
-> ex) RUN pip3 install -r requirements.txt
+> ex) RUN pip install -r requirements.txt
 > ```
 >
 > 
 >
 > VOLUME : instruction을 사용하여 호스트의 dir를 docker컨테이너에 연결 시킬수 있다. 그래서 데이터, 소스코드, 외부설정파일 등등을 docker image에 commit하지 않고 docker containr에서 사용 가능 하도록 한다. 
+>
+> ```dockerfile
+> VOLUME ["경로1", "경로2"]
+> ex) VOLUME ["/data","/etc/nginx/site-enabled", "/var/log/nginx"]
+> ```
+>
+> 
 >
 > WORKDIR : working dir를 지정해준다. ubuntu의 cd와 같은 개념으로 생각한다.
 >
@@ -358,7 +438,7 @@ EXPOSE 443
 >
 > 
 >
-> ENTRYPOINT : 이미지를 컨테이너로 띄울 때 항상 실행되야 하는 커맨드를 지정할때 사용한다
+> ENTRYPOINT : 이미지를 컨테이너로 띄울 때 항상 실행되야 하는 커맨드를 지정할때 사용한다.
 >
 > - Django 서버 실행
 >
@@ -395,12 +475,12 @@ EXPOSE 443
 > EXPOSE <포트>/<프로토콜>
 > 
 > ex) EXPOSE 80
-> 	EXPOSE 9999/UDP
+> 	EXPOSE 443/UDP
 > ```
 >
 > 
 >
-> COPY : COPY명령문은 호스의 dir나 file을 docker 이미지의 파일 시스템으로 복사하기 위해 사용한다. 절대, 상대 경로 모두 지원한다.
+> COPY : COPY명령문은 호스트의 dir나 file을 docker 이미지의 파일 시스템으로 복사하기 위해 사용한다. 절대, 상대 경로 모두 지원한다.
 >
 > ```dockerfile
 > COPY <시작>... <목적>
@@ -454,15 +534,15 @@ MAINTAINER thisisme
 
 RUN mkdir /helloworld
 WORKDIR /helloworld 
-ADD go.log go.log
-ADD out.sh out.sh 
-RUN chmod 755 go.log 
-RUN chmod 755 out.sh
+COPY go.log go1.log
+ADD out.sh out2.sh 
+RUN chmod 755 go1.log 
+RUN chmod 755 out2.sh
 ```
 
-> centos 7을 다운받은후 helloworld 폴더를 생성한다 이후 work space를 helloworld에서 작업을 하고 go.log와 out.sh를 host에서 image파일로 복사를 해준다 이후 go.log와 out.sh의 권한을 변경 해준다.
+> centos 7을 다운받은후 helloworld 폴더를 생성한다 이후 work space를 helloworld에서 작업을 하고 go.log와 out.sh를 host에서 image파일로 복사를 해준다 이후 go1.log와 out2.sh의 권한을 변경 해준다.
 
-- **image 생성**
+- **image 생성 (build)**
 
 ```bash
 ubuntu11@ubuntu11:~/docker11$ docker build -t ttest /home/ubuntu11/docker11/
@@ -513,7 +593,7 @@ centos              7                   b5b4d78bc90c        7 weeks ago         
 - 실행
 
 ```bash
-$ docker run -it ttest /bin/cat go.log
+$ docker run -it ttest /bin/cat go1.log
 this is log file!!
 ```
 
@@ -523,7 +603,7 @@ this is log file!!
 $ docker run -it ttest /bin/bash
 [root@9c1d783e41d4 helloworld]# pwd
 /helloworld
-[root@9c1d783e41d4 helloworld]# cat go.log
+[root@9c1d783e41d4 helloworld]# cat go1.log
 this is log file!!
 ```
 
@@ -540,9 +620,9 @@ this is log file!!
 > 1. 볼륨(Volume)
 > 2. 바인트 마운트(bind mount)
 
->  <img src="img/01.png" alt="image-20200629161534829" style="zoom:67%;" />
+>  <img src="img/01.png" alt="01" style="zoom:67%;" />
 
-###### **볼륨(Volume)**
+### 볼륨(Volume)
 
 - 생성(create) 및 조회(ls), 상세 조회(inspect)
 
@@ -594,7 +674,7 @@ test.txt
 > docker inspect로 컨테이너의 상세 정보를 확인해 보면 our-vol 볼륨이 volume타입으로 마운트 되어 있다.
 
 ```bash
-$ docker insperct one
+$ docker inspect one
 ...
 "Mounts": [
             {
@@ -635,10 +715,10 @@ our-vol
 > 마운트되어 있지 않은 모든 볼륨을 한번에 제거할 수 있습니다.
 
 ```bash
-$docker volume prune
+$ docker volume prune
 ```
 
-###### **바인트 마운트**
+### 바인트 마운트
 
 > 호스트 파일 시스템의 특정 경로를 컨테이너로 바로 마운트할 수 있다.
 >
@@ -647,13 +727,13 @@ $docker volume prune
 > 예를 들어 현재 경로에 test.txt를 생성하고, 해당 호스트 경로를 컨테이너의 /app 경로에 마운트 하는방법을 예시로 들어보자.
 
 ```bash
-$touch test.txt
+$ touch test.txt
 $ docker run -v `pwd`:/app -it --name one busybox /bin/sh
 / # ls /app
 test.txt
 ```
 
-##### 볼륨 VS 바인드 마운트
+### 볼륨 VS 바인드 마운트
 
 > 볼륨과 바인드 마운트의 가장 큰 차이점은 Docker가 해당 마운트 포인트를 관리 해주냐 안해주냐 이다.
 >
@@ -664,4 +744,188 @@ test.txt
 > 그래서 대부분의 상황에서는 볼륨이 권장된다.
 >
 > 하지만 컨테이너화된 로컬 개발 환경을 구성할 때는 바인트 마운트가 이점이 있다.
+
+<hr/>
+
+## Docker Compose
+
+<img src="img/03.png" alt="03" style="zoom:67%;" />
+
+### Docker Compose란?
+
+> 여러개의 컨테이너를 일괄적으로 관리하는 도구
 >
+> Docker-Compose는 docker와는 별개의 도구이지만 Docker ce for windows에서 기본적으로 제공한다.
+
+### Docker-compose.yml
+
+> Docker-Compose.yml은 Docker-Compose의 구성 파일이다.
+>
+> 한 파일 안에 여러 컨테이너 설정 내용을 저장한다.
+>
+> 도커 어플리케이션을 위한 서비스, 네트워크, 볼륨 등을 정의 할수 있다. 
+>
+> Docker-Compose의 구성 파일은 텍스트 파일인 YAML 형식을 사용한다.
+>
+> 사용 시 주의사항은 탭 대신 공백을 사용해야 하고, 배열 데이터의 경우 '-' 기호를 붙여야 한다는 것은 꼭 기억해야 한다.
+
+- docker build => docker-compose build : 도커 이미지 만들기
+- docker run [옵션] => docker-compose.yml : 이미지에 넣는 파라미터
+- docker run => docker-compose up : 파라미터가 들어간 이미지를 실제로 실행
+
+<img src="img/04.png" alt="04" style="zoom:67%;" />
+
+- 설치하기
+
+```bash
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   638  100   638    0     0  14177      0 --:--:-- --:--:-- --:--:-- 14177
+100 7857k  100 7857k    0     0   866k      0  0:00:09  0:00:09 --:--:-- 1080k
+```
+
+- docker-compose 사용하기
+
+```bash
+$ sudo chmod +x /usr/local/bin/docker-compose
+
+#버전을 확인해보자
+$ docker-compose version
+docker-compose version 1.9.0, build 2585387
+docker-py version: 1.10.6
+CPython version: 2.7.9
+OpenSSL version: OpenSSL 1.0.1t  3 May 2016
+```
+
+- docker-compose.yml 사용해보기
+
+> 아래의 예제를 설치해보자
+
+```bash
+$ docker pull alicek106/composetest:web
+$ docker pull alicek106/composetest:mysql
+```
+
+> 하나는 web, 하나는 mysql이다.
+>
+> web서비스는 mysql 서비스에 접속해 DB를 사용(--link)한다.
+>
+> web서비스를 외부에서 접속 할수 있게 80번 port를 열어 80번 호스트 port와 연결(-p)하며 mysql 서비스에 링크 시킨다.
+>
+> 웹서버가 작동하도록 command를 준다.
+>
+> mysql 서비스 또한 command를 주어 컨테이너 시작시 mtsql이 작동하도록 한다.
+
+```yaml
+#vim docker-compose.yml
+
+#docker run -d -p 80:80 --link mysql:db --name web alicek106/composetest:web apachectl -DFOREGROUND
+web:
+  image: alicek106/composetest:web
+  ports:
+   - "80:80"
+  links:
+   - mysql:db
+  command: apachectl -DFOREGROUND
+  
+#docker run -d --name mysql alicek106/composetest:mysql mysqld
+mysql:
+  image: alicek106/composetest:mysql
+  command: mysqld
+```
+
+> 결론 => .yml을 이용하여 두 컨테이너를 돌린다.
+
+- docker-compose.yml 실행 (docker-compose up)
+
+> -d 옵션을 주어 백그라운드로 실행시킨다.
+>
+> -d 옵션을 주지 않을시 터미널을 하나 차지한다.
+
+```bash
+$ docker-compose up -d
+Creating dockercom_mysql_1
+Creating dockercom_web_1
+```
+
+- 만들어진 container 확인 (docker-compose ps)
+
+> docker-compose ps 로 확인을 해보자.
+>
+> 만들어진 container를 확인 할수 있다.
+
+```bash
+$ docker-compose ps
+      Name                 Command           State    Ports
+-----------------------------------------------------------
+dockercom_mysql_1   mysqld                   Up
+dockercom_web_1     apachectl -DFOREGROUND   Exit 0
+```
+
+- 특정 container의 갯수 설정 (docker-compose scale)
+
+> docker-compose scale을 이용해 보자.
+
+```bash
+# mysql container 3개로 늘리기
+$ docker-compose scale mysql=3
+$ docker-compose ps
+      Name                 Command           State    Ports
+-----------------------------------------------------------
+dockercom_mysql_1   mysqld                   Up
+dockercom_mysql_2   mysqld                   Up
+dockercom_mysql_3   mysqld                   Up
+dockercom_web_1     apachectl -DFOREGROUND   Exit 0
+```
+
+- 특정 서비스 container만 만들기
+
+> yml파일에서 설정해준 이름을 따로 지정해준다.
+
+```bash
+# mysql만 만들기 
+$ docker-compose up -d mysql
+```
+
+- Interactive shell 사용하기
+
+> -it 옵션을 줄 필요가 없어진다.
+
+```bash
+$ docker-compose run web /bin/bash
+root@0143fc8aad85:/#
+```
+
+- 만들어진 container 삭제하기 (down)
+
+```bash
+$ docker-compose down 
+Stopping dockercom_mysql_3 ... done
+Stopping dockercom_mysql_2 ... done
+Stopping dockercom_mysql_1 ... done
+Removing dockercom_web_run_1 ... done
+Removing dockercom_mysql_3 ... done
+Removing dockercom_mysql_2 ... done
+Removing dockercom_web_1 ... done
+Removing dockercom_mysql_1 ... done
+```
+
+- 프로젝트의 이름 설정후 관리 (-p)
+
+> -p 옵션을 사용하여 프로젝트의 이름을 설정할 수 있다.
+>
+> docker-compose -p로 관리
+
+```bash
+# 프로젝트 이름 myproject로 설정하여 compose 생성
+$ docker-compose -p myproject up -d
+
+# 프로젝트 이름 myproject 확인하기
+$ docker-compose -p myproject ps
+
+# 프로젝트 이름 myproject 종료
+$ docker-compose -p myproject down
+```
+
