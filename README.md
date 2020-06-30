@@ -16,18 +16,18 @@
 
   
 
-#### docker의 설치
+#### docker의 설치 (os : ubuntu)
 
 ```bash
-sudo apt update
-sudo apt install apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-sudo apt update
+$ sudo apt update
+$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+$ sudo apt update
 apt-cache policy docker-ce
 ```
 
-> 각각 한줄씩 ubuntu terminal에 입력을 해준다.
+> 각각 한줄씩 terminal에 입력을 해준다.
 
 <hr/>
 
@@ -36,7 +36,7 @@ apt-cache policy docker-ce
 > docker를 사용하다보면 docker 데몬이 root권한으로 실행되기 때문에 sudo를 붙여줘야하는 불편함이 있다. 이를 해결 하기 위해 로그인 계정을 docker 그룹에 추가해준다.
 
 ```bash
-sudo usermod -aG docker $USER
+$ sudo usermod -aG docker $USER
 ```
 
 > 위 명령어를 실행시 프로그램을 종료후 다시 로그인 해도 sudo 없이 docker 명령어의 실행이 가능하다.
@@ -53,17 +53,39 @@ sudo usermod -aG docker $USER
 >
 >도커 이미지를 이용하면 이미지에 설정해둔 대로 컨테이너의 구성환경을 적용할 수 있다.
 
-- 버전확인(-v)
+- 버전 간단 확인(-v)
 
 ```bash
-docker -v
+$ docker -v
 Docker version 19.03.12, build 48a66213fe
+```
+
+- 버전(version)
+
+```bash
+$ docker version
+Client: Docker Engine - Community
+ Version:           19.03.12
+ API version:       1.40
+...
+Server: Docker Engine - Community
+ Engine:
+  Version:          19.03.12
+  API version:      1.40 (minimum version 1.12)
+...
+```
+
+Server가 안나올때 : docker 가 root계정으로 설치 되었을때 root계정이 아닌 계정으로 docker를 실해하고자 할때 server가 안나옴
+
+```bash
+$ sudo usermod -a -G docker $USER
+$ sudo service docker restart
 ```
 
 - 이미지 목록 보기(images)
 
 ```bash
-sudo docker images
+$ sudo docker images | $ docker image ls
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 ubuntu              latest              74435f89ab78        11 days ago         73.9MB
 ubuntu              18.04               8e4ce0a6ce69        11 days ago         64.2MB
@@ -72,15 +94,15 @@ ubuntu              18.04               8e4ce0a6ce69        11 days ago         
 - 이미지 검색(search)
 
 ```bash
-sudo docker search [이미지 이름]
-ex) sudo docker search ubuntu
+$ sudo docker search [이미지 이름]
+ex) $ sudo docker search ubuntu
 ```
 
 - 이미지 받기(pull)
 
 ```bash
-sudo docker pull [이미지 이름]:[버전]
-ex) sudo docker pull ubuntu:16.04
+$ sudo docker pull [이미지 이름]:[버전]
+ex) $ sudo docker pull ubuntu:16.04
 ```
 
 > 버전에 latest를 쓰면 최신 버전으로 받을수 있다.
@@ -88,8 +110,8 @@ ex) sudo docker pull ubuntu:16.04
 - 이미지 삭제(rmi)
 
 ```bash
-sudo docker rmi [이미지 id]
-sudo docker rmi -f [이미지 id]
+$ sudo docker rmi [이미지 id]
+$ sudo docker rmi -f [이미지 id]
 ```
 
 > 컨테이너를 삭제하기 전에 이미지를 삭제할때 **-f** 옵션을 붙이면 컨테이너도 강제 삭제가 가능하다.
@@ -105,7 +127,7 @@ sudo docker rmi -f [이미지 id]
 - 컨테이너 목록 보기(ps)
 
 ```bash
-sudo docker ps [옵션]
+$ sudo docker ps [옵션]
 ```
 
 > -a : 모든 컨테이너 목록 출력
@@ -113,8 +135,8 @@ sudo docker ps [옵션]
 - 컨테이너 만들고 실행(run)
 
 ```bash
-sudo docker run [옵션] [이미지 이름] : [태그]
-ex) docker run --rm -it --name server ubutu:latest /bin/sh
+$ sudo docker run [옵션] [이미지 이름] : [태그]
+ex) $ docker run --rm -it --name server ubutu:latest /bin/sh
 => ubuntu 최신버전, server name을 가진 컨테이너의 /bin/sh를 실행 시킨후 프로세스 종료시 컨테이너를 제거해라
 ```
 
@@ -142,14 +164,14 @@ ex) docker run --rm -it --name server ubutu:latest /bin/sh
 - 컨테이너 시작(start)
 
 ```bash
-sudo docker start [컨테이너 id 또는 name]
-ex) docker start 74435f89ab78 or docker start ubuntu:18.04
+$ sudo docker start [컨테이너 id 또는 name]
+ex) $ docker start 74435f89ab78 or docker start ubuntu:18.04
 ```
 
 - 만들어진 컨테이너 들어가기(attach)
 
 ```bash
-docker attach ubuntu:latest
+$ docker attach ubuntu:latest
 ```
 
 - run과 start, stop의 차이
@@ -161,27 +183,27 @@ docker attach ubuntu:latest
 - 컨테이너 재시작(restart)
 
 ```bash
-sudo docker retart [컨테이너 id 또는 name]
-ex) docker restart 74435f89ab78 or docker restart ubuntu:18.04
+$ sudo docker retart [컨테이너 id 또는 name]
+ex) $ docker restart 74435f89ab78 or docker restart ubuntu:18.04
 ```
 
 - 컨테이너 정지(stop)
 
 ```bash
-sudo docker stop [컨테이너 id 또는 name]
-ex) docker restart 74435f89ab78 or docker restart ubuntu:18.04
+$ sudo docker stop [컨테이너 id 또는 name]
+ex) $ docker restart 74435f89ab78 or docker restart ubuntu:18.04
 ```
 
 - 컨테이너 이름 변경(raname)
 
 ```bash
-sudo docker rename [기존 이름] [새로운 이름]
+$ sudo docker rename [기존 이름] [새로운 이름]
 ```
 
 - 외부에서 컨테이너 안의 명령을 실행(exec)
 
 ```bash
-sudo docker exec [옵션] [컨테이너 이름, ID] [명령] [매개변수]
+$ sudo docker exec [옵션] [컨테이너 이름, ID] [명령] [매개변수]
 ex) $sudo docker run -d --name etest ubuntu:16.04 /bin/bash -c "while true; do echo Hello World; sleep 1; done"
 ```
 
@@ -248,6 +270,14 @@ ubuntu              latest              74435f89ab78        12 days ago         
 ```
 
 > test_con이미지가 생성 됨을 확인할 수 있다.
+
+<hr/>
+
+## 도커 컨테이너 라이프 사이클
+
+<img src="img/02.png" alt="image-20200629161534829" style="zoom:67%;" />
+
+
 
 <hr/> 
 
@@ -343,7 +373,7 @@ EXPOSE 443
 >
 > CMD : 이 커맨드를 사용하여 docker container가 시작할때 실행할 커맨드를 지정할수 있다. RUN과 기능은 비슷하다 하지만 CMD는 docker image를 빌드할때 실행되는 것이 아닌 docker conatiner가 시작될때 실행 된다.
 >
-> ```bash
+> ```dockerfile
 > CMD ["<커맨드>","<파라미터1>","<파라미터2>"]
 > CMD ["<파라미터1>","<파라미터2>"]
 > CMD <전체 커맨드>
@@ -417,7 +447,7 @@ EXPOSE 443
 
 - **docker file 작성**
 
-```bash
+```dockerfile
 #vim
 FROM centos:7
 MAINTAINER thisisme
@@ -483,7 +513,7 @@ centos              7                   b5b4d78bc90c        7 weeks ago         
 - 실행
 
 ```bash
-docker run -it ttest /bin/cat go.log
+$ docker run -it ttest /bin/cat go.log
 this is log file!!
 ```
 
@@ -631,7 +661,8 @@ test.txt
 >
 > 하지만 Docker 상에서 image나 container, network와 비슷한 방식으로 관리가 되는 이점이 있다.
 >
-> 그래서 대부분은 상환에서는 볼륨이 권장된다.
+> 그래서 대부분의 상황에서는 볼륨이 권장된다.
 >
 > 하지만 컨테이너화된 로컬 개발 환경을 구성할 때는 바인트 마운트가 이점이 있다.
 >
+
