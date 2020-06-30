@@ -275,7 +275,7 @@ ubuntu              latest              74435f89ab78        12 days ago         
 
 ## 도커 컨테이너 라이프 사이클
 
-<img src="img/02.png" alt="image-20200629161534829" style="zoom:67%;" />
+<img src="img/02-1.png" alt="image-20200629161534829" style="zoom:67%;" />
 
 
 
@@ -665,4 +665,3 @@ test.txt
 >
 > 하지만 컨테이너화된 로컬 개발 환경을 구성할 때는 바인트 마운트가 이점이 있다.
 >
-
