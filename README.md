@@ -25,7 +25,6 @@ $ sudo apt update
 $ sudo apt install apt-transport-https ca-certificates curl software-properties-common
 $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 $ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-$ sudo apt update
 ```
 
 ### 환경 확인하기
@@ -827,7 +826,7 @@ $ docker pull alicek106/composetest:mysql
 >
 > 웹서버가 작동하도록 command를 준다.
 >
-> mysql 서비스 또한 command를 주어 컨테이너 시작시 mtsql이 작동하도록 한다.
+> mysql 서비스 또한 command를 주어 컨테이너 시작시 mysql이 작동하도록 한다.
 
 ```yaml
 #vim docker-compose.yml
