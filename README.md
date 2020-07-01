@@ -5,7 +5,7 @@
 ## 목차
 
 - Docker의 설치
-- Docker를 sudo 없이 실행
+- Docker의 실행
 - 명령어(이미지, 컨테이너)
 - 컨테이너의 이미지화
 - 컨테이너 외부노출
@@ -28,12 +28,11 @@ $ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ub
 $ sudo apt update
 ```
 
-### 확인하기
+### 환경 확인하기
 
 
 ```bash
 $ apt-cache policy docker-ce
-$ sudo apt install docker-ce
 docker-ce: 
 	Installed: (none) 
 	Candidate: 19.03.12~3-0~ubuntu-focal
@@ -123,7 +122,7 @@ Server: Docker Engine - Community
 ...
 ```
 
-Server가 안나올때 : docker 가 root계정으로 설치 되었을때 root계정이 아닌 계정으로 docker를 실해하고자 할때 server가 안나옴 (위에서 Docker를 sudo 없이 실행을 했다면 뜨지않음)
+Server가 안나올때 : docker 가 root계정으로 설치 되었을때 root계정이 아닌 계정으로 docker를 실해하고자 할때 server가 안나옴 (위에서 Docker를 sudo 없이 실행 부분을 시연 했다면 뜨지않음)
 
 ```bash
 $ sudo usermod -aG docker $USER
@@ -316,8 +315,7 @@ $ docker exec hello apt-get update
 ```bash
 $ docker ps -a
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                        PORTS               NAMES
-2167b8a5218f        ubuntu:16.04        "/bin/bash"         8 minutes ago       Exited (0) 11 seconds ago                         webser
-504dcee082d1        ubuntu:16.04        "/bin/bash"         9 minutes ago       Created                                        
+2167b8a5218f        ubuntu:16.04        "/bin/bash"         8 minutes ago       Exited (0) 11 seconds ago           
 ```
 > 2167b8a5218f이 방금 종료 된 컨테이너이다
 
@@ -398,6 +396,7 @@ EXPOSE 443
 > ```dockerfile
 > FROM <이미지>
 > FROM <이미지>:<태그>
+> ex) FROM ubuntu:16.04
 > ```
 >
 > 
@@ -406,6 +405,7 @@ EXPOSE 443
 >
 > ```dockerfile
 > MAINTAINER 사용자ID<사용자 e-mail>
+> ex) MAINTAINER thismain<thismain@test.com>
 > ```
 >
 > 
@@ -589,6 +589,14 @@ centos              7                   b5b4d78bc90c        7 weeks ago         
 > docker build -t ttest /home/ubuntu11/docker11/
 >
 > dockerfile이 있는 docker11에 경로를 지정해주고 ttest 라는 image를 만들었다.
+>
+> 옵션
+>
+> -t : -t <저장소 이름>/<이미지 이름>:<태그> 형식으로 저장소, 이미지이름, 태그를 설정해줄수 있다.
+>
+> -q : docker file이 실행될때 출력결과를 표시하지 않는다.
+>
+> --rm : docker file 실행 후 이미지생성이 성공하면 임시 container를 삭제한다.
 
 - 실행
 
@@ -797,6 +805,9 @@ docker-compose version 1.9.0, build 2585387
 docker-py version: 1.10.6
 CPython version: 2.7.9
 OpenSSL version: OpenSSL 1.0.1t  3 May 2016
+
+$ docker-compose -v
+docker-compose version 1.9.0, build 2585387
 ```
 
 - docker-compose.yml 사용해보기
